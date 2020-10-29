@@ -19,7 +19,7 @@ library(lubridate)
 
 # Parameters
 # change this to your directory
-setwd("~/Documents/Lab_Legal_Design/schema_eval")
+setwd("~/GitHub/Lab_Legal_Design/schema_eval/data")
 
 file_weekly_visitors = "New_York/visitors-overview-total.xlsx"
 file_engagement_depth = "New_York/visitors-engagement-depth.xlsx"

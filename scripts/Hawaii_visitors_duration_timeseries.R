@@ -26,10 +26,10 @@ read_files <- function(filename, index) {
 }
 
 file_names <- 
- 0:27 %>% 
+ 0:35 %>% 
  map_chr(~ str_glue(downloaded_data_prefix, ., downloaded_date_suffix))
 
-0:27 %>% 
+0:35 %>% 
  map2_dfr(file_names, ., ~ read_files(.x, .y)) %>% 
  filter(week_index != 14) %>% 
  write_rds(file_out)

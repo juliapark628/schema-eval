@@ -1,17 +1,12 @@
----
-title: "New York"
-author: "Julia Park"
-date: "`r Sys.Date()`"
-output: 
-  github_document:
-    toc: true
----
+New York
+================
+Julia Park
+2020-10-28
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+  - [Visitors](#visitors)
+  - [Duration](#duration)
 
-```{r message=FALSE, warning=FALSE}
+``` r
 # Libraries
 library(tidyverse)
 library(readxl)
@@ -32,17 +27,16 @@ file_session_type = "New_York/visitors-overview-session-type.xlsx"
 #direct vs search vs organic
 file_traffic_type = "New_York/visitors-overview-traffic-type.xlsx"
 
-file_search_result_performance = "New_York/search_result_performance.rds"
 file_engagement_duration_timeseries = "New_York/visitors-duration-timeseries.rds"
 
 
 #===============================================================================
 
 # Code
-schema_week <- 19 # 5/29/2020
-schema_date <- as.POSIXct(as.Date("2020-05-29"))
+schema_week <- 19
 weekly_visitors <- 
-  read_excel(file_weekly_visitors, sheet = "Dataset1")
+  read_excel(file_weekly_visitors, skip = 6) %>% 
+  filter(`Week Index` < 39)
 engagement_depth <- read_excel(file_engagement_depth)
 engagement_duration <- read_excel(file_engagement_duration)
 freq_session_count <- read_excel(file_freq_session_count)
@@ -57,14 +51,12 @@ traffic_type_2020 <-
   filter(`Date Range` == "Jan 1, 2020 - Sep 28, 2020") %>% 
   filter(`Week Index` < 39)
 
-search_result_performance <- read_rds(file_search_result_performance)
 engagement_duration_timeseries <- read_rds(file_engagement_duration_timeseries)
-
 ```
 
 ## Visitors
 
-```{r}
+``` r
 x_labels <- function(x) {
  case_when(
   x == 0 ~ "January", 
@@ -78,14 +70,12 @@ x_labels <- function(x) {
 x_breaks <- c(0, 9, 18, 26, 35)
 ```
 
-
-```{r}
+``` r
 weekly_visitors %>% 
   drop_na() %>% 
-  filter(`Week Index` != 43) %>% 
-  filter(`Week Index` != 0) %>% 
   ggplot(aes(x = `Week Index`, y = Users, color = `Date Range`)) +
   geom_vline(aes(xintercept = schema_week)) +
+  geom_smooth() + 
   geom_line() + 
   scale_x_continuous(
     breaks = x_breaks, 
@@ -98,10 +88,35 @@ weekly_visitors %>%
   theme_minimal()
 ```
 
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](New_York_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
+traffic_type_2020 %>% 
+  drop_na() %>% 
+  filter(Segment != "All Users") %>% 
+  filter(Segment != "Organic Traffic") %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
+  geom_vline(aes(xintercept = schema_week)) + 
+  geom_line() + 
+  scale_x_continuous(
+   breaks = x_breaks, 
+   labels = x_labels
+  ) +
+  labs(
+    title = "2020 traffic sources: visitor spike likely due to environmental factors", 
+    subtitle = "But schema may have increased click through rate during this timeframe",
+    x = "Date"
+  ) + 
+  theme_minimal()
+```
+
+![](New_York_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ## Duration
 
-```{r}
+``` r
 new_engagement_duration_timeseries <-
  engagement_duration_timeseries %>% 
  mutate(
@@ -123,7 +138,7 @@ new_engagement_duration_timeseries <-
  filter(`Session Duration` != "Total")
 ```
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
@@ -141,8 +156,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
+![](New_York_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   filter(`Session Duration` != "0 - 10 seconds") %>% 
@@ -161,8 +177,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
+![](New_York_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   mutate(
     pageview_per_session = Pageviews / Sessions
@@ -183,46 +200,4 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
-
-## Search Result Performance
-
-```{r}
-search_result_performance %>% 
-  ggplot(aes(x = Date)) + 
-  geom_line(aes(y = CTR)) + 
-  geom_smooth(aes(y = CTR)) + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  theme_minimal()
-```
-
-
-```{r}
-search_result_performance %>% 
-  ggplot(aes(x = Date, y = `Average Position`)) + 
-  geom_line() + 
-  geom_smooth() + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  scale_y_reverse() + 
-  theme_minimal()
-```
-
-
-```{r}
-search_result_performance %>% 
-  drop_na() %>% 
-  ggplot(aes(x = Date, y = `Impressions`)) + 
-  geom_line() + 
-  geom_smooth() + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  theme_minimal()
-```
-```{r}
-search_result_performance %>% 
-  drop_na() %>% 
-  ggplot(aes(x = Date, y = `Clicks`)) + 
-  geom_line() + 
-  geom_smooth() + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  theme_minimal()
-```
-
+![](New_York_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->

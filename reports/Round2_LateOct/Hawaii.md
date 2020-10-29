@@ -1,20 +1,12 @@
----
-title: "Hawaii"
-author: "Julia Park"
-date: "`r Sys.Date()`"
-output: 
-  github_document:
-    toc: true
-  html_document:
-    df_print: paged
-  pdf_document: default
----
+Hawaii
+================
+Julia Park
+2020-10-29
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+  - [Visitors](#visitors)
+  - [Duration](#duration)
 
-```{r message=FALSE, warning=FALSE}
+``` r
 # Libraries
 library(tidyverse)
 library(readxl)
@@ -61,12 +53,11 @@ queries <- read_excel(file_queries, skip = 6)
 
 engagement_duration_timeseries <- read_rds(file_engagement_duration_timeseries)
 session_type_timeseries <- session_type
-
 ```
 
 ## Visitors
 
-```{r}
+``` r
 daily_visitors_2020 %>% 
  drop_na() %>% 
  ggplot(aes(x = `Day Index`, y = Users)) +
@@ -81,8 +72,9 @@ daily_visitors_2020 %>%
  theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-```{r}
+``` r
 x_labels_march <- function(x) {
  case_when(
   x == 2 ~ "March", 
@@ -108,9 +100,7 @@ x_labels <- function(x) {
 x_breaks <- c(0, 9, 17, 26)
 ```
 
-
-
-```{r}
+``` r
 weekly_visitors %>% 
   filter(Users != 0) %>% 
   filter(`Week Index` != 43) %>% 
@@ -131,11 +121,13 @@ weekly_visitors %>%
   theme_minimal()
 ```
 
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ## Duration
 
-```{r}
+``` r
 new_engagement_duration_timeseries <-
  engagement_duration_timeseries %>% 
  mutate(
@@ -155,10 +147,9 @@ new_engagement_duration_timeseries <-
  ) %>% 
  ungroup() %>% 
  filter(`Session Duration` != "Total")
-
 ```
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
@@ -176,7 +167,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
-```{r}
+![](Hawaii_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   filter(`Session Duration` != "0 - 10 seconds") %>% 
@@ -195,9 +188,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
-
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   ggplot(aes(x = week_index, y = Pageviews, color = `Session Duration`)) + 
@@ -215,8 +208,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   mutate(
     pageview_per_session = Pageviews / Sessions
@@ -238,3 +232,4 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->

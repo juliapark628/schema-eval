@@ -3,9 +3,12 @@ title: "Florida Law Help Website Analysis"
 author: "Julia Park"
 date: "`r Sys.Date()`"
 output:
+  github_document:
+    toc: true
   html_document:
     df_print: paged
   pdf_document: default
+
 ---
 
 ```{r setup, include=FALSE}
@@ -27,6 +30,7 @@ file_visitors_overview = "Florida_Law_Help/visitors-overview(1).xlsx"
 #===============================================================================
 
 # Code
+schema_date <- as.POSIXct(as.Date("2020-05-29"))
 visitors_overview = read_excel(file_visitors_overview, skip = 6) %>% 
  filter(Segment == "All Users") %>% 
  filter(str_detect(`Date Range`, "2020"))
@@ -34,13 +38,6 @@ queries <- read_excel(file_search_performance, sheet = "Queries")
 pages <- read_excel(file_search_performance, sheet = "Pages")
 dates <- read_excel(file_search_performance, sheet = "Dates")
 
-```
-
-## Problems with Analytics
-
-```{r}
-visitors_overview %>% 
- top_n(15, `Week Index`)
 ```
 
 ## Visitors 
@@ -87,6 +84,15 @@ dates %>%
  theme_minimal()
 ```
 
+```{r}
+dates %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Date, y = `Impressions`)) + 
+  geom_line() + 
+  geom_vline(aes(xintercept = schema_date), color = "red") + 
+  theme_minimal()
+```
+
 ## Queries
 
 ```{r}
@@ -98,34 +104,5 @@ queries %>%
   subtitle = "Highly ranked searches have extremely varying click-through rates"
  ) +
  theme_minimal()
-```
-
-Queries with the highest click-through rates: 
-
-```{r}
-queries %>% 
- top_n(5, wt = CTR) %>% 
- arrange(desc(`CTR`)) %>% 
- select(Query, CTR, everything())
-```
-
-Queries where Law Help is in the first position: 
-
-```{r}
-queries %>% 
- top_n(-5, wt = Position) %>% 
- arrange(Position) %>% 
- select(Query, Position, everything())
-```
-
-
-## Recommendation
-
-Pages with high traffic (many clicks), but low click-through rate: 
-
-```{r}
-pages %>% 
- top_n(20, Clicks) %>% 
- arrange(CTR)
 ```
 

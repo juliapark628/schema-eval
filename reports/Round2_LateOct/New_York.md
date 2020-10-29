@@ -1,17 +1,13 @@
----
-title: "New York"
-author: "Julia Park"
-date: "`r Sys.Date()`"
-output: 
-  github_document:
-    toc: true
----
+New York
+================
+Julia Park
+2020-10-29
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+  - [Visitors](#visitors)
+  - [Duration](#duration)
+  - [Search Result Performance](#search-result-performance)
 
-```{r message=FALSE, warning=FALSE}
+``` r
 # Libraries
 library(tidyverse)
 library(readxl)
@@ -59,12 +55,11 @@ traffic_type_2020 <-
 
 search_result_performance <- read_rds(file_search_result_performance)
 engagement_duration_timeseries <- read_rds(file_engagement_duration_timeseries)
-
 ```
 
 ## Visitors
 
-```{r}
+``` r
 x_labels <- function(x) {
  case_when(
   x == 0 ~ "January", 
@@ -78,8 +73,7 @@ x_labels <- function(x) {
 x_breaks <- c(0, 9, 18, 26, 35)
 ```
 
-
-```{r}
+``` r
 weekly_visitors %>% 
   drop_na() %>% 
   filter(`Week Index` != 43) %>% 
@@ -98,10 +92,11 @@ weekly_visitors %>%
   theme_minimal()
 ```
 
+![](New_York_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ## Duration
 
-```{r}
+``` r
 new_engagement_duration_timeseries <-
  engagement_duration_timeseries %>% 
  mutate(
@@ -123,7 +118,7 @@ new_engagement_duration_timeseries <-
  filter(`Session Duration` != "Total")
 ```
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
@@ -141,8 +136,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
+![](New_York_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   filter(`Session Duration` != "0 - 10 seconds") %>% 
@@ -161,8 +157,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
+![](New_York_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   mutate(
     pageview_per_session = Pageviews / Sessions
@@ -183,10 +180,11 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
+![](New_York_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ## Search Result Performance
 
-```{r}
+``` r
 search_result_performance %>% 
   ggplot(aes(x = Date)) + 
   geom_line(aes(y = CTR)) + 
@@ -195,8 +193,15 @@ search_result_performance %>%
   theme_minimal()
 ```
 
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
 
-```{r}
+    ## Warning: Removed 1 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 1 rows containing missing values (geom_path).
+
+![](New_York_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
 search_result_performance %>% 
   ggplot(aes(x = Date, y = `Average Position`)) + 
   geom_line() + 
@@ -206,8 +211,15 @@ search_result_performance %>%
   theme_minimal()
 ```
 
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
 
-```{r}
+    ## Warning: Removed 1 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 1 rows containing missing values (geom_path).
+
+![](New_York_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
 search_result_performance %>% 
   drop_na() %>% 
   ggplot(aes(x = Date, y = `Impressions`)) + 
@@ -216,7 +228,12 @@ search_result_performance %>%
   geom_vline(aes(xintercept = schema_date), color = "red") + 
   theme_minimal()
 ```
-```{r}
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](New_York_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
 search_result_performance %>% 
   drop_na() %>% 
   ggplot(aes(x = Date, y = `Clicks`)) + 
@@ -226,3 +243,6 @@ search_result_performance %>%
   theme_minimal()
 ```
 
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](New_York_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->

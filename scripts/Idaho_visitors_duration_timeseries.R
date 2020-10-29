@@ -22,13 +22,13 @@ read_files <- function(filename, index) {
   replace_na(list(`Session Duration` = "Total")) %>% 
   mutate(
    week_index = index
-  )
+  ) 
 }
 
 file_names <- 
- 0:31 %>% 
+ 0:42 %>% 
  map_chr(~ str_glue(downloaded_data_prefix, ., downloaded_date_suffix))
 
-0:31 %>% 
+0:42 %>% 
  map2_dfr(file_names, ., ~ read_files(.x, .y)) %>% 
  write_rds(file_out)

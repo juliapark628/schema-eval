@@ -3,6 +3,8 @@ title: "Idaho Legal Aid Website Analysis"
 author: "Julia Park"
 date: "`r Sys.Date()`"
 output:
+  github_document:
+    toc: true
   html_document:
     df_print: paged
   pdf_document: default
@@ -35,6 +37,7 @@ file_session_type = "Idaho/visitors-overview-session-type.xlsx"
 #direct vs search vs organic
 file_traffic_type = "Idaho/visitors-overview-traffic-type.xlsx"
 
+file_search_result_performance = "Idaho/search_result_performance.rds"
 file_engagement_duration_timeseries = "Idaho/visitors-duration-timeseries.rds"
 file_session_type_timeseries = "Idaho/visitors-session-type-timeseries.rds"
 
@@ -45,11 +48,13 @@ file_queries = "Idaho/acquisition-sc-queries.xlsx"
 
 # Code
 schema_week <- 19 # 5/6/2020
-string_2019 <- "Jan 1, 2019 - Jul 30, 2019"
-string_2020 <- "Jan 1, 2020 - Jul 30, 2020"
-daily_visitors_2019 <- read_excel(file_daily_visitors) %>% filter(`Date Range` == string_2019)
-daily_visitors_2020 <- read_excel(file_daily_visitors) %>% filter(`Date Range` == string_2020)
-weekly_visitors <- read_excel(file_weekly_visitors)
+schema_date <-  as.POSIXct(as.Date("2020-05-06"))
+
+string_2019 <- "Jan 1, 2019 - Oct 27, 2019"
+string_2020 <- "Jan 1, 2020 - Oct 27, 2020"
+daily_visitors_2019 <- read_excel(file_daily_visitors, sheet = "Dataset1") %>% filter(`Date Range` == string_2019)
+daily_visitors_2020 <- read_excel(file_daily_visitors, sheet = "Dataset1") %>% filter(`Date Range` == string_2020)
+weekly_visitors <- read_excel(file_weekly_visitors, sheet = "Dataset1")
 engagement_depth <- read_excel(file_engagement_depth)
 engagement_duration <- read_excel(file_engagement_duration)
 freq_interval <- read_excel(file_freq_interval)
@@ -59,6 +64,8 @@ traffic_type <- read_excel(file_traffic_type)
 landing_pages <- read_excel(file_landing_pages)
 queries <- read_excel(file_queries)
 
+
+search_result_performance <- read_rds(file_search_result_performance)
 engagement_duration_timeseries <- read_rds(file_engagement_duration_timeseries)
 session_type_timeseries <- read_rds(file_session_type_timeseries)
 ```
@@ -70,7 +77,7 @@ daily_visitors_2020 %>%
  filter(Users < 900) %>% 
  ggplot(aes(x = `Day Index`, y = Users)) +
  geom_line() + 
- geom_vline(xintercept = as.POSIXct(as.Date("2020-05-06")), color = "red") + 
+ geom_vline(xintercept = schema_date, color = "red") + 
  geom_smooth(method = "loess") +
  labs(
   title = "2020 daily visitors: Trend follows average visitor trend for this year", 
@@ -81,52 +88,21 @@ daily_visitors_2020 %>%
 
 ```{r}
 weekly_visitors %>% 
- filter(`Week Index` != 30) %>% 
- filter(`Week Index` != 0) %>% 
- ggplot(aes(x = `Week Index`, y = Users, color = `Date Range`)) +
- geom_vline(aes(xintercept = schema_week)) +
- geom_smooth() + 
- geom_line() + 
- labs(
-  title = "Visitor count decreases less drastically in 2020 after schema implementation", 
-  subtitle = "However, 2019 and 2020 trends are too different to say for sure"
- ) + 
- theme_minimal()
-```
-
-```{r}
-traffic_type %>% 
-  filter(`Date Range` == string_2019) %>% 
-  filter(`Week Index` != 30) %>% 
+  drop_na() %>% 
+  filter(`Week Index` != 43) %>% 
   filter(`Week Index` != 0) %>% 
-  filter(Segment != "All Users") %>% 
-  filter(Segment != "Organic Traffic") %>% 
-  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
+  ggplot(aes(x = `Week Index`, y = Users, color = `Date Range`)) +
+  geom_vline(aes(xintercept = schema_week)) +
+  geom_smooth() + 
   geom_line() + 
   labs(
-    title = "2019 traffic sources: search traffic drastically higher than direct traffic"
+    title = "Visitor count decreases less drastically in 2020 after schema implementation", 
+    subtitle = "However, 2019 and 2020 trends are too different to say for sure"
   ) + 
   theme_minimal()
 ```
 
-```{r}
-traffic_type %>% 
-  filter(`Date Range` == string_2020) %>% 
-  filter(`Week Index` != 0) %>% 
-  filter(`Week Index` != 30) %>% 
-  filter(Segment != "All Users") %>% 
-  filter(Segment != "Organic Traffic") %>% 
-  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
-  geom_line() + 
-  geom_vline(xintercept = 18) +
-  labs(
-    title = "2020 traffic sources: schema implementation doesn't change traffic source distribution" 
-  ) +
- theme_minimal()
-```
-
 ## Duration
-
 ```{r}
 new_engagement_duration_timeseries <-
  engagement_duration_timeseries %>% 
@@ -149,7 +125,6 @@ new_engagement_duration_timeseries <-
  filter(`Session Duration` != "Total")
 
 ```
-
 
 ```{r}
 new_engagement_duration_timeseries %>% 
@@ -184,86 +159,44 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
-## Comparison
+## Search Result Performance
 
 ```{r}
-total_direct_search_clicks <- 
- queries %>% 
- filter(str_detect(`Date Range`, "2020")) %>% 
- filter(`Search Query` == "idaho legal aid services" || `Search Query` == "legal aid idaho" || `Search Query` == "idaho legal aid") %>% 
- drop_na() %>% 
- summarize(
-  total_direct_search_clicks = sum(Clicks)
- )
+search_result_performance %>% 
+  ggplot(aes(x = Date)) + 
+  geom_line(aes(y = CTR)) + 
+  geom_smooth(aes(y = CTR)) + 
+  geom_vline(aes(xintercept = schema_date), color = "red") + 
+  theme_minimal()
+```
 
-total_direct_search_clicks
+
+```{r}
+search_result_performance %>% 
+  ggplot(aes(x = Date, y = `Average Position`)) + 
+  geom_line() + 
+  geom_smooth() + 
+  geom_vline(aes(xintercept = schema_date), color = "red") + 
+  scale_y_reverse() + 
+  theme_minimal()
 ```
 
 ```{r}
-total_clicks <- 
-109547
-
-total_clicks
+search_result_performance %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Date, y = `Impressions`)) + 
+  geom_line() + 
+  geom_smooth() + 
+  geom_vline(aes(xintercept = schema_date), color = "red") + 
+  theme_minimal()
 ```
 
 ```{r}
-total_direct_search_clicks / total_clicks
+search_result_performance %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Date, y = `Clicks`)) + 
+  geom_line() + 
+  geom_smooth() + 
+  geom_vline(aes(xintercept = schema_date), color = "red") + 
+  theme_minimal()
 ```
-
-## Recommendations 
-
-Pages with high Click rate, but low CTR: 
-
-```{r}
-landing_pages %>% 
- filter(str_detect(`Date Range`, "2020")) %>% 
- filter(`Landing Page` != "Total") %>% 
- top_n(6, wt = Clicks) %>% 
- arrange(`CTR`) %>% 
- select(`Landing Page`, CTR, Clicks, everything())
-```
-
-Highest CTR: 
-
-```{r}
-landing_pages %>% 
- filter(str_detect(`Date Range`, "2020")) %>% 
- filter(`Landing Page` != "Total") %>% 
- top_n(5, wt = CTR) %>% 
- arrange(desc(`CTR`)) %>% 
- select(`Landing Page`, CTR, everything())
-```
-
-Highest Impression count: 
-
-```{r}
-landing_pages %>% 
- filter(str_detect(`Date Range`, "2020")) %>% 
- filter(`Landing Page` != "Total") %>% 
- top_n(5, wt = Impressions) %>% 
- arrange(desc(`Impressions`)) %>% 
- select(`Landing Page`, Impressions, everything())
-```
-
-Highest Page-per-session count: 
-
-```{r}
-landing_pages %>% 
- filter(str_detect(`Date Range`, "2020")) %>% 
- filter(`Landing Page` != "Total") %>% 
- top_n(5, wt = `Pages / Session`) %>% 
- arrange(desc(`Pages / Session`)) %>% 
- select(`Landing Page`, `Pages / Session`, everything())
-```
-
-Highest click count: 
-
-```{r}
-landing_pages %>% 
- filter(str_detect(`Date Range`, "2020")) %>% 
- filter(`Landing Page` != "Total") %>% 
- top_n(5, wt = `Clicks`) %>% 
- arrange(desc(`Clicks`)) %>% 
- select(`Landing Page`, `Clicks`, everything())
-```
-

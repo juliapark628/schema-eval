@@ -1,19 +1,14 @@
----
-title: "Minnesota"
-author: 
-date: "`r Sys.Date()`"
-output: 
-  github_document:
-    toc: true
-  html_document:
-    df_print: paged
----
+Minnesota
+================
+2020-10-28
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+  - [Landing pages](#landing-pages)
+      - [Clicks](#clicks)
+      - [Pages per session](#pages-per-session)
+  - [Visitors](#visitors)
+  - [Duration](#duration)
 
-```{r message=FALSE, warning=FALSE}
+``` r
 # Libraries
 library(tidyverse)
 library(readxl)
@@ -53,46 +48,81 @@ freq_session_count <- read_excel(file_freq_session_count)
 session_type <- read_excel(file_session_type)
 traffic_type <- read_excel(file_traffic_type)
 engagement_duration_timeseries <- read_rds(file_engagement_duration_timeseries)
-
 ```
 
 ## Landing pages
-
 
 ### Clicks
 
 Increase in April visits explained by COVID changes
 
-```{r}
+``` r
 landing_pages %>% 
   filter(Date == "Mar 1, 2020 - Apr 30, 2020") %>% 
   top_n(5, wt = Clicks) %>% 
   arrange(desc(Clicks))
 ```
 
-```{r}
+    ## # A tibble: 5 x 12
+    ##   `Landing Page` Date  Impressions Clicks   CTR `Average Positi… Sessions
+    ##   <chr>          <chr>       <dbl>  <dbl> <dbl>            <dbl>    <dbl>
+    ## 1 /self-help-li… Mar …      294181  40832 13.9              6.23    41482
+    ## 2 /self-help-li… Mar …      367616  27767  7.55             7.77    28727
+    ## 3 /self-help-li… Mar …     1301819  19028  1.46             7.50    18252
+    ## 4 /self-help-li… Mar …      765905  11759  1.54            11.7      6695
+    ## 5 /self-help-li… Mar …      630651  11429  1.81            16.1      6226
+    ## # … with 5 more variables: `Bounce Rate` <dbl>, `Pages / Session` <dbl>,
+    ## #   `Triage: Funnel 1 - Select topic (Goal 1 Completions)` <dbl>, `Triage:
+    ## #   Funnel 1 - Select topic (Goal 1 Value)` <dbl>, `Triage: Funnel 1 - Select
+    ## #   topic (Goal 1 Conversion Rate)` <dbl>
+
+``` r
 landing_pages %>% 
   filter(Date == "Jan 1, 2020 - Feb 29, 2020") %>% 
   top_n(5, wt = Clicks) %>% 
   arrange(desc(Clicks))
 ```
 
+    ## # A tibble: 5 x 12
+    ##   `Landing Page` Date  Impressions Clicks   CTR `Average Positi… Sessions
+    ##   <chr>          <chr>       <dbl>  <dbl> <dbl>            <dbl>    <dbl>
+    ## 1 /self-help-li… Jan …     1140068  21778  1.91             12.9        0
+    ## 2 /self-help-li… Jan …      730781  11196  1.53             12.0        0
+    ## 3 /self-help-li… Jan …      231683   5816  2.51             22.0        0
+    ## 4 /self-help-li… Jan …      207738   5084  2.45             10.3        0
+    ## 5 /self-help-li… Jan …      273161   4152  1.52             25.2        0
+    ## # … with 5 more variables: `Bounce Rate` <dbl>, `Pages / Session` <dbl>,
+    ## #   `Triage: Funnel 1 - Select topic (Goal 1 Completions)` <dbl>, `Triage:
+    ## #   Funnel 1 - Select topic (Goal 1 Value)` <dbl>, `Triage: Funnel 1 - Select
+    ## #   topic (Goal 1 Conversion Rate)` <dbl>
+
 ### Pages per session
 
-The most engaged visitors are visiting general sites, which is a good sign - exploring at a general site is natural. 
+The most engaged visitors are visiting general sites, which is a good
+sign - exploring at a general site is natural.
 
-
-
-```{r}
+``` r
 landing_pages %>% 
  top_n(5, wt = `Pages / Session`) %>% 
  arrange(desc(`Pages / Session`))
 ```
 
+    ## # A tibble: 5 x 12
+    ##   `Landing Page` Date  Impressions Clicks   CTR `Average Positi… Sessions
+    ##   <chr>          <chr>       <dbl>  <dbl> <dbl>            <dbl>    <dbl>
+    ## 1 /self-help-li… Mar …        7957     43 0.540             7.98       53
+    ## 2 /self-help-li… Mar …       11193     82 0.733            33.7        58
+    ## 3 /              Mar …       35069   1189 3.39             28.2      1508
+    ## 4 /lawhelpmn-gu… Mar …        7801     37 0.474             7.41      145
+    ## 5 /self-help-li… Mar …        6498      9 0.139            42.8         3
+    ## # … with 5 more variables: `Bounce Rate` <dbl>, `Pages / Session` <dbl>,
+    ## #   `Triage: Funnel 1 - Select topic (Goal 1 Completions)` <dbl>, `Triage:
+    ## #   Funnel 1 - Select topic (Goal 1 Value)` <dbl>, `Triage: Funnel 1 - Select
+    ## #   topic (Goal 1 Conversion Rate)` <dbl>
 
 ## Visitors
 
-```{r}
+``` r
 weekly_visitors %>% 
  filter(`Week Index` != 33) %>% 
  filter(`Week Index` != 0) %>% 
@@ -106,7 +136,11 @@ weekly_visitors %>%
  theme_minimal()
 ```
 
-```{r}
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](Minnesota_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
 traffic_type %>% 
   filter(`Date Range` == string_2019) %>% 
   filter(`Week Index` != 33) %>% 
@@ -122,8 +156,9 @@ traffic_type %>%
   theme_minimal()
 ```
 
+![](Minnesota_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-```{r}
+``` r
 traffic_type %>% 
   filter(`Date Range` == string_2020) %>% 
   filter(`Week Index` != 0) %>% 
@@ -138,9 +173,11 @@ traffic_type %>%
  theme_minimal()
 ```
 
+![](Minnesota_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
 ## Duration
 
-```{r}
+``` r
 new_engagement_duration_timeseries <-
  engagement_duration_timeseries %>% 
  mutate(
@@ -160,11 +197,9 @@ new_engagement_duration_timeseries <-
  ) %>% 
  ungroup() %>% 
  filter(`Session Duration` != "Total")
-
 ```
 
-
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
@@ -177,8 +212,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
+![](Minnesota_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   filter(`Session Duration` != "0 - 10 seconds") %>% 
@@ -191,7 +227,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
-```{r}
+![](Minnesota_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
 new_engagement_duration_timeseries %>% 
   mutate(
     pageview_per_session = Pageviews / Sessions
@@ -208,7 +246,4 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
-
-
-
-
+![](Minnesota_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->

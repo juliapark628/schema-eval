@@ -3,6 +3,8 @@ title: "Idaho Legal Aid Website Analysis"
 author: "Julia Park"
 date: "`r Sys.Date()`"
 output:
+  github_document:
+    toc: true
   html_document:
     df_print: paged
   pdf_document: default

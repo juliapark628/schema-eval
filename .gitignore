@@ -53,3 +53,6 @@ data-raw/
 *.tsv
 *.txt
 *.xpt
+
+# html files
+*.html

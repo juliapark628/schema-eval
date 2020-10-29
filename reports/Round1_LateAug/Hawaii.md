@@ -1,20 +1,14 @@
----
-title: "Hawaii"
-author: "Julia Park"
-date: "`r Sys.Date()`"
-output: 
-  github_document:
-    toc: true
-  pdf_document: default
-  html_document:
-    df_print: paged
----
+Hawaii
+================
+Julia Park
+2020-10-28
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+  - [Visitors](#visitors)
+  - [Duration](#duration)
+  - [Search check](#search-check)
+  - [Solution](#solution)
 
-```{r message=FALSE, warning=FALSE}
+``` r
 # Libraries
 library(tidyverse)
 library(readxl)
@@ -59,12 +53,11 @@ queries <- read_excel(file_queries, skip = 6)
 
 engagement_duration_timeseries <- read_rds(file_engagement_duration_timeseries)
 session_type_timeseries <- session_type
-
 ```
 
 ## Visitors
 
-```{r}
+``` r
 daily_visitors_2020 %>% 
  drop_na() %>% 
  ggplot(aes(x = `Day Index`, y = Users)) +
@@ -79,8 +72,9 @@ daily_visitors_2020 %>%
  theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-```{r}
+``` r
 x_labels_march <- function(x) {
  case_when(
   x == 2 ~ "March", 
@@ -123,7 +117,11 @@ weekly_visitors %>%
  theme_minimal()
 ```
 
-```{r}
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+![](Hawaii_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
 traffic_type_2019 %>% 
   drop_na() %>% 
   filter(Users != 0) %>% 
@@ -152,8 +150,9 @@ traffic_type_2019 %>%
   theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-```{r}
+``` r
 traffic_type_2020 %>% 
   drop_na() %>% 
   mutate(
@@ -182,9 +181,11 @@ traffic_type_2020 %>%
   theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
 ## Duration
 
-```{r}
+``` r
 new_engagement_duration_timeseries <-
  engagement_duration_timeseries %>% 
  mutate(
@@ -204,10 +205,9 @@ new_engagement_duration_timeseries <-
  ) %>% 
  ungroup() %>% 
  filter(`Session Duration` != "Total")
-
 ```
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
@@ -225,7 +225,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
-```{r}
+![](Hawaii_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   filter(`Session Duration` != "0 - 10 seconds") %>% 
@@ -244,7 +246,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal() 
 ```
 
-```{r}
+![](Hawaii_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
 session_type_timeseries %>% 
  filter(Year == 2020) %>% 
  filter(Segment != "All Users") %>% 
@@ -253,8 +257,9 @@ session_type_timeseries %>%
  theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   filter(`Session Duration` != "Total") %>% 
   ggplot(aes(x = week_index, y = Pageviews, color = `Session Duration`)) + 
@@ -272,8 +277,9 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
-```{r}
+``` r
 new_engagement_duration_timeseries %>% 
   mutate(
     pageview_per_session = Pageviews / Sessions
@@ -295,10 +301,11 @@ new_engagement_duration_timeseries %>%
   theme_minimal()
 ```
 
+![](Hawaii_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ## Search check
 
-```{r}
+``` r
 date_1 <- as.Date("2020-06-17")
 date_2 <- as.Date("2020-08-02")
 
@@ -311,8 +318,12 @@ new_engagement_duration_timeseries %>%
  )
 ```
 
+    ## # A tibble: 1 x 1
+    ##   total
+    ##   <dbl>
+    ## 1 15050
 
-```{r}
+``` r
 total_direct_search_clicks <- 
  queries %>% 
  filter(`Search Query` == "legal aid hawaii" || `Search Query` == "legal aid society of hawaii" || `Search Query` == "hawaii legal aid" || `Search Query` == "legal aid society") %>% 
@@ -324,16 +335,25 @@ total_direct_search_clicks <-
 total_direct_search_clicks
 ```
 
+    ## # A tibble: 1 x 1
+    ##   total_direct_search_clicks
+    ##                        <dbl>
+    ## 1                       2193
 
-```{r}
+``` r
 direct_search_percentage <- total_direct_search_clicks / 12192
 
 direct_search_percentage
 ```
 
+    ##   total_direct_search_clicks
+    ## 1                   0.179872
 
 ## Solution
 
-Increase in bouncers not *because* of schema, since it was happening before the implementation - likely many people searching for legal aid because of shutdown and not finding what they were looking for. 
+Increase in bouncers not *because* of schema, since it was happening
+before the implementation - likely many people searching for legal aid
+because of shutdown and not finding what they were looking for.
 
-However, the lack of increase in engaged viewers may be due to incorrect schema?
+However, the lack of increase in engaged viewers may be due to incorrect
+schema?

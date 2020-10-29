@@ -1,0 +1,234 @@
+---
+title: "Idaho"
+author: 
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Libraries
+library(tidyverse)
+library(readxl)
+library(lubridate)
+
+# Parameters
+# change this to your directory
+setwd("~/Documents/Legal Design Lab/schema_eval")
+
+file_daily_visitors = "Idaho/visitors-daily-count.xlsx"
+file_weekly_visitors = "Idaho/visitors-overview-total.xlsx"
+file_engagement_depth = "Idaho/visitors-engagement-depth.xlsx"
+file_engagement_duration = "Idaho/visitors-engagement-duration.xlsx"
+file_freq_interval = "Idaho/visitors-frequency-recency-interval.xlsx"
+file_freq_session_count = "Idaho/visitors-frequency-recency-session-count.xlsx"
+
+#multi vs single
+file_session_type = "Idaho/visitors-overview-session-type.xlsx" 
+
+#direct vs search vs organic
+file_traffic_type = "Idaho/visitors-overview-traffic-type.xlsx"
+
+file_engagement_duration_timeseries = "Idaho/visitors-duration-timeseries.rds"
+file_session_type_timeseries = "Idaho/visitors-session-type-timeseries.rds"
+
+#===============================================================================
+
+# Code
+string_2019 <- "Jan 1, 2019 - Jul 30, 2019"
+string_2020 <- "Jan 1, 2020 - Jul 30, 2020"
+daily_visitors_2019 <- read_excel(file_daily_visitors) %>% filter(`Date Range` == string_2019)
+daily_visitors_2020 <- read_excel(file_daily_visitors) %>% filter(`Date Range` == string_2020)
+weekly_visitors_2019 <- read_excel(file_weekly_visitors) %>% filter(`Date Range` == string_2019)
+weekly_visitors_2020 <- read_excel(file_weekly_visitors) %>% filter(`Date Range` == string_2020)
+engagement_depth <- read_excel(file_engagement_depth)
+engagement_duration <- read_excel(file_engagement_duration)
+freq_interval <- read_excel(file_freq_interval)
+freq_session_count <- read_excel(file_freq_session_count)
+session_type <- read_excel(file_session_type)
+traffic_type <- read_excel(file_traffic_type)
+engagement_duration_timeseries <- read_rds(file_engagement_duration_timeseries)
+session_type_timeseries <- read_rds(file_session_type_timeseries)
+
+```
+
+## Daily/Weekly Visitors
+
+```{r}
+daily_visitors_2019 %>% 
+ filter(Users > 200) %>% 
+ ggplot(aes(x = `Day Index`, y = Users)) +
+ geom_line() + 
+ geom_smooth(method = "loess") +
+ labs(
+  title = "2019 visitors"
+ )
+```
+
+```{r}
+daily_visitors_2020 %>% 
+ ggplot(aes(x = `Day Index`, y = Users)) +
+ geom_line() + 
+ geom_vline(xintercept = as.POSIXct(as.Date("2020-05-06")), color = "red") + 
+ labs(
+  title = "2020 visitors (outlier included)"
+ )
+```
+
+
+
+```{r}
+daily_visitors_2020 %>% 
+ filter(Users < 900) %>% 
+ ggplot(aes(x = `Day Index`, y = Users)) +
+ geom_line() + 
+ geom_vline(xintercept = as.POSIXct(as.Date("2020-05-06")), color = "red") + 
+ geom_smooth(method = "loess") +
+ labs(
+  title = "2020 visitors (outlier taken out)"
+ )
+```
+
+```{r}
+weekly_visitors_2019 %>% 
+ filter(`Week Index` != 30) %>% 
+ filter(`Week Index` != 0) %>% 
+ ggplot(aes(x = `Week Index`, y = Users)) +
+ geom_line() + 
+ labs(
+  title = "2020 visitors (outlier included)"
+ )
+```
+
+## Traffic
+
+```{r}
+traffic_type %>% 
+  filter(`Date Range` == string_2019) %>% 
+  filter(Segment != "All Users") %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
+  geom_line() + 
+  labs(
+    title = "2019 traffic"
+  )
+```
+
+
+
+```{r}
+traffic_type %>% 
+  filter(`Date Range` == string_2020) %>% 
+  filter(Segment != "All Users") %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
+  geom_line() + 
+  labs(
+    title = "2020 traffic"
+  )
+```
+
+
+```{r}
+traffic_type %>% 
+  filter(Segment == "Search Traffic") %>% 
+  filter(Segment != "All Users") %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = `Date Range`)) +
+  geom_line() + 
+  geom_vline(xintercept = 19) +
+  geom_smooth() +
+  labs(
+    title = "2019/2020 search traffic"
+  )
+```
+
+## Session type users
+
+```{r}
+session_type_timeseries %>% 
+  filter(Segment == "Multi-session Users") %>% 
+  filter(Users > 225) %>% 
+  ggplot(aes(x = Week_Index, y = Users, color = Year)) +
+  geom_line() + 
+  geom_vline(xintercept = 19) +
+  labs(
+    title = "2019/2020 multi-session users traffic"
+  )
+
+session_type %>% 
+  filter(Segment == "Multi-session Users") %>% 
+  ggplot(aes(x = Week_Index, y = Users, color = `Date Range`)) +
+  geom_line() + 
+  geom_vline(xintercept = 19) +
+  geom_smooth() +
+  labs(
+    title = "2019/2020 multi-session users traffic"
+  )
+```
+
+
+```{r}
+session_type_timeseries %>% 
+  filter(Segment == "Single Session Users") %>% 
+  ggplot(aes(x = Week_Index, y = Users, color = Year)) +
+  geom_line() + 
+  geom_vline(xintercept = 19) +
+  labs(
+    title = "2019/2020 multi-session users traffic"
+  )
+
+session_type %>% 
+  filter(Segment == "Single Session Users") %>% 
+  filter(Segment != "All Users") %>% 
+  ggplot(aes(x = `Week_Index`, y = Users, color = `Date Range`)) +
+  geom_line() + 
+  geom_vline(xintercept = 19) +
+  geom_smooth() +
+  labs(
+    title = "2019/2020 single session users traffic"
+  )
+```
+
+
+## Session Time series
+
+```{r}
+engagement_duration_timeseries %>% 
+  filter(`Session Duration` != "Total") %>% 
+  ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
+  geom_line() + 
+  geom_vline(xintercept = 19)
+```
+
+```{r}
+engagement_duration_timeseries %>% 
+  filter(`Session Duration` != "Total") %>% 
+  filter(`Session Duration` != "0-10 seconds") %>% 
+  ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
+  geom_line() + 
+  geom_vline(xintercept = 19)
+```
+
+
+```{r}
+engagement_duration_timeseries %>% 
+  filter(`Session Duration` != "Total") %>% 
+  ggplot(aes(x = week_index, y = Pageviews, color = `Session Duration`)) + 
+  geom_line() +
+  geom_vline(xintercept = 19)
+```
+
+```{r}
+engagement_duration_timeseries %>% 
+  mutate(
+    pageview_per_session = Pageviews / Sessions
+  ) %>% 
+  filter(`Session Duration` != "Total") %>% 
+  ggplot(aes(x = week_index, y = pageview_per_session, color = `Session Duration`)) + 
+  geom_line() + 
+  geom_vline(xintercept = 19)
+```
+

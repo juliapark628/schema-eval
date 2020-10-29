@@ -1,0 +1,109 @@
+---
+title: "Florida_Law_Help"
+author: 
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Libraries
+library(tidyverse)
+library(readxl)
+library(lubridate)
+
+# Parameters
+setwd("~/Documents/Legal Design Lab/schema_eval")
+
+file_search_performance = "Florida_Law_Help/search-performance.xlsx" 
+
+#===============================================================================
+
+# Code
+queries <- read_excel(file_search_performance, sheet = "Queries")
+pages <- read_excel(file_search_performance, sheet = "Pages")
+dates <- read_excel(file_search_performance, sheet = "Dates")
+
+```
+
+## Dates EDA
+
+```{r}
+dates %>% 
+ ggplot(aes(x = Date, y = Clicks)) + 
+ geom_line() + 
+ geom_vline(xintercept = as.POSIXct(as.Date("2020-05-29")), color = "red") +
+ geom_smooth(method = "loess")
+```
+
+```{r}
+dates %>% 
+ ggplot(aes(x = Date, y = CTR)) + 
+ geom_line() + 
+ geom_vline(xintercept = as.POSIXct(as.Date("2020-05-29")), color = "red") +
+ geom_smooth(method = "loess")
+```
+
+```{r}
+dates %>% 
+ ggplot(aes(x = Date, y = Position)) + 
+ geom_line() + 
+ geom_vline(xintercept = as.POSIXct(as.Date("2020-05-29")), color = "red") +
+ geom_smooth(method = "loess")
+```
+
+
+
+```{r}
+dates %>% 
+ ggplot(aes(x = Date, y = Impressions)) + 
+ geom_line() + 
+ geom_vline(xintercept = as.POSIXct(as.Date("2020-05-29")), color = "red") +
+ geom_smooth(method = "loess")
+```
+
+First guess: CTR is steady, but impressions (and thus magnitude of clicks) is going down. Position also increased slightly, then decreased. Either the schema is not working as intended (thus pushing down position), or people are just searching this topic less often during this time (explaining the small decrease in position, but drastic decresae in impressions)
+
+
+# Queries
+
+An outlier: 
+
+```{r}
+queries %>% 
+ filter(Impressions > 10000)
+```
+
+```{r}
+queries %>% 
+  filter(Position < 3)
+```
+
+
+```{r}
+queries %>% 
+ filter(Impressions < 10000) %>% 
+ ggplot(aes(x = Impressions, y = Position)) + 
+ geom_point(alpha = .7)
+```
+
+```{r}
+queries %>% 
+ ggplot(aes(x = Clicks, y = Position)) + 
+ geom_point(alpha = .7)
+```
+
+
+```{r}
+queries %>% 
+ ggplot(aes(x = CTR, y = Position)) + 
+ geom_point(alpha = .7)
+```
+
+
+

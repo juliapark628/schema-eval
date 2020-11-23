@@ -1,10 +1,11 @@
 Florida LSNF Website Analysis
 ================
 Julia Park
-2020-10-29
+2020-10-30
 
   - [Visitors](#visitors)
   - [Duration](#duration)
+  - [Search Performance](#search-performance)
 
 ## Visitors
 
@@ -17,3 +18,11 @@ Julia Park
 ![](Florida_LSNF_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ![](Florida_LSNF_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+# Search Performance
+
+![](Florida_LSNF_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+![](Florida_LSNF_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+![](Florida_LSNF_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->

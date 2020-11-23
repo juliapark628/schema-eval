@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 ```
 
 ```{r message=FALSE, warning=FALSE}
@@ -92,8 +92,31 @@ weekly_visitors %>%
     labels = x_labels
   ) + 
   labs(
-    title = "Visitor counts roughly increase at same rate in 2019 and 2020", 
+    title = "New York: Visitor counts roughly increase at same rate in 2019 and 2020", 
     subtitle = "Large visitor spike in July/August"
+  ) + 
+  theme_minimal()
+```
+
+
+## Traffic
+
+```{r}
+traffic_type_2020 %>% 
+  drop_na() %>% 
+  filter(Segment != "All Users") %>% 
+  filter(Segment != "Organic Traffic") %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
+  geom_vline(aes(xintercept = schema_week)) + 
+  geom_line() + 
+  scale_x_continuous(
+   breaks = x_breaks, 
+   labels = x_labels
+  ) +
+  labs(
+    title = "2020 traffic sources: visitor spike likely due to environmental factors", 
+    subtitle = "But schema may have increased click through rate during this timeframe",
+    x = "Date"
   ) + 
   theme_minimal()
 ```
@@ -134,7 +157,7 @@ new_engagement_duration_timeseries %>%
    breaks = x_breaks
   ) +
   labs(
-   title = "Slightly more bouncers/short-duration visitors after schema implementation", 
+   title = "New York: Slightly more bouncers/short-duration visitors after schema implementation", 
    subtitle = "Disclaimer: increase is slight enough that it may be due to chance",
    x = "Date"
   ) +
@@ -154,7 +177,7 @@ new_engagement_duration_timeseries %>%
    breaks = x_breaks
   ) +
   labs(
-   title = "Short-duration visitor count slightly increases after schema implementation", 
+   title = "New York: Closer look at non-bouncers", 
    subtitle = "Long-duration visitor count stays steady",
    x = "Date"
   ) +
@@ -176,7 +199,7 @@ new_engagement_duration_timeseries %>%
    breaks = x_breaks
   ) +
   labs(
-   title = "Pageview per session shows no indication of schema effect", 
+   title = "New York: Pageview per session shows no indication of schema effect", 
    x = "Date", 
    y = "Pageview per session"
   ) +
@@ -188,41 +211,47 @@ new_engagement_duration_timeseries %>%
 
 ```{r}
 search_result_performance %>% 
-  ggplot(aes(x = Date)) + 
-  geom_line(aes(y = CTR)) + 
-  geom_smooth(aes(y = CTR)) + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  theme_minimal()
-```
-
-
-```{r}
-search_result_performance %>% 
-  ggplot(aes(x = Date, y = `Average Position`)) + 
-  geom_line() + 
-  geom_smooth() + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  scale_y_reverse() + 
-  theme_minimal()
-```
-
-
-```{r}
-search_result_performance %>% 
-  drop_na() %>% 
-  ggplot(aes(x = Date, y = `Impressions`)) + 
-  geom_line() + 
-  geom_smooth() + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  theme_minimal()
-```
-```{r}
-search_result_performance %>% 
   drop_na() %>% 
   ggplot(aes(x = Date, y = `Clicks`)) + 
   geom_line() + 
   geom_smooth() + 
   geom_vline(aes(xintercept = schema_date), color = "red") + 
-  theme_minimal()
+  theme_minimal() + 
+  labs(
+    title = "New York: Huge increase of visitors from Google's search result page in July-August", 
+    subtitle = "A temporary resource on a COVID rent release program drove the increase"
+  )
 ```
+
+```{r}
+search_result_performance %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Date)) + 
+  geom_line(aes(y = CTR)) + 
+  geom_smooth(aes(y = CTR)) + 
+  geom_vline(aes(xintercept = schema_date), color = "red") + 
+  theme_minimal() + 
+  labs(
+    title = "New York: increased visitors in July/Aug drives down CTR",
+    subtitle = "Effect of schema, if any, indiscernable amid impact of temporary resource"
+  )
+```
+
+
+```{r}
+search_result_performance %>% 
+  drop_na() %>% 
+  ggplot(aes(x = Date, y = `Average Position`)) + 
+  geom_line() + 
+  geom_smooth() + 
+  geom_vline(aes(xintercept = schema_date), color = "red") + 
+  scale_y_reverse() + 
+  theme_minimal() + 
+  labs(
+    title = "New York: increased visitors in July/Aug drives down CTR"
+  )
+```
+
+
+
 

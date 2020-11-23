@@ -50,7 +50,7 @@ dates %>%
  geom_vline(xintercept = schema_date, color = "red") +
  geom_smooth(method = "loess") + 
  labs(
-  title = "2020 daily visitors: Trend follows average visitor trend for this year"
+  title = "Florida Law Help: 2020 daily clicks (from Search Console)"
  ) + 
  theme_minimal()
 ```
@@ -58,15 +58,15 @@ dates %>%
 
 ```{r}
 dates %>% 
- ggplot(aes(x = Date, y = CTR)) + 
- geom_line() + 
- geom_vline(xintercept = as.POSIXct(as.Date("2020-05-29")), color = "red") +
- geom_smooth(method = "loess") +
- labs(
-  title = "Click-through rate slightly increases after schema implementation", 
-  subtitle = "Drastic loss/increase of visitors is due to search demand/seasonal changes"
- ) + 
- theme_minimal()
+  ggplot(aes(x = Date, y = CTR)) + 
+  geom_line() + 
+  geom_vline(xintercept = as.POSIXct(as.Date("2020-05-29")), color = "red") +
+  geom_smooth(method = "loess") +
+  labs(
+    title = "Florida Law Help: 2020 click-through rate", 
+    subtitle = "CTR holds steady throughout the year"
+  ) + 
+  theme_minimal()
 ```
 
 
@@ -78,21 +78,13 @@ dates %>%
  geom_smooth(method = "loess") + 
  scale_y_reverse() + 
  labs(
-  title = "Search ranking improved after schema implementation", 
-  subtitle = "Previously, average ranking was decreasing", 
+  title = "Florida Law Help: 2020 average search result ranking", 
+  subtitle = "A slight decrease in ranking was reversed after schema implementatio", 
   y = "Average search rank"
  ) + 
  theme_minimal()
 ```
 
-```{r}
-dates %>% 
-  drop_na() %>% 
-  ggplot(aes(x = Date, y = `Impressions`)) + 
-  geom_line() + 
-  geom_vline(aes(xintercept = schema_date), color = "red") + 
-  theme_minimal()
-```
 
 ## Queries
 
@@ -107,3 +99,31 @@ queries %>%
  theme_minimal()
 ```
 
+Queries with the highest click-through rates: 
+
+```{r}
+queries %>% 
+ top_n(5, wt = CTR) %>% 
+ arrange(desc(`CTR`)) %>% 
+ select(Query, CTR, everything())
+```
+
+Queries where Law Help is in the first position: 
+
+```{r}
+queries %>% 
+ top_n(-5, wt = Position) %>% 
+ arrange(Position) %>% 
+ select(Query, Position, everything())
+```
+
+
+## Recommendation
+
+Pages with high traffic (many clicks), but low click-through rate: 
+
+```{r}
+pages %>% 
+ top_n(20, Clicks) %>% 
+ arrange(CTR)
+```

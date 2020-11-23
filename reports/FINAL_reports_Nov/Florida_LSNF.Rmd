@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 # Libraries
 library(tidyverse)
 library(readxl)
+library(lubridate)
 
 # Parameters
 # change this to your directory
@@ -69,34 +70,80 @@ dates <- read_excel(file_search_performance, sheet = "Dates")
 ## Visitors
 
 ```{r}
-daily_visitors %>% 
-  drop_na() %>% 
-  ggplot(aes(x = `Day Index`, y = Users)) +
-  geom_line() + 
-  geom_smooth() +
-  geom_vline(xintercept = schema_date, color = "red") + 
-  labs(
-    title = "2020 daily visitors: Trend follows average visitor trend for this year", 
-    subtitle = "Number of visitors stayed flat after schema implementation"
-  ) + 
-  theme_minimal()
+x_labels <- function(x) {
+ case_when(
+  x == 0 ~ "January", 
+  x == 9 ~ "March", 
+  x == 17 ~ "May", 
+  x == 26 ~ "July", 
+  x == 35 ~ "September", 
+ )
+}
+
+x_breaks <- c(0, 9, 17, 26, 35)
 ```
+
 
 
 ```{r}
 weekly_visitors %>% 
- filter(`Week Index` != 43) %>% 
- filter(`Week Index` != 0) %>% 
- ggplot(aes(x = `Week Index`, y = Users, color = `Date Range`)) +
- geom_line() + 
- geom_vline(aes(xintercept = schema_week)) +
- geom_smooth() +
- labs(
-  title = "Weekly Visitors: 2020's visitor trend differs drastically from last year's"
- ) + 
- theme_minimal()
+  filter(`Week Index` != 43) %>% 
+  filter(`Week Index` != 0) %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = `Date Range`)) +
+  geom_line() + 
+  geom_vline(aes(xintercept = schema_week)) +
+  geom_smooth() +
+  scale_x_continuous(
+    breaks = x_breaks, 
+    labels = x_labels
+  ) +
+  labs(
+    title = "Florida LSNF: 2020 vs 2019 weekly Visitors", 
+    subtitle = "2020's visitor trend before schema implemetation differs drastically from last year"
+  ) + 
+  theme_minimal()
 ```
 
+## Traffic Type
+```{r}
+traffic_type %>% 
+  filter(`Date Range` == string_2019) %>% 
+  filter(`Week Index` != 30) %>% 
+  filter(`Week Index` != 0) %>% 
+  filter(Segment != "All Users") %>% 
+  filter(Segment != "Organic Traffic") %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
+  geom_line() + 
+  scale_x_continuous(
+    breaks = x_breaks, 
+    labels = x_labels
+  ) +
+  labs(
+    title = "2019 traffic sources: direct and search traffic contribution proportions are consistent"
+  ) + 
+  theme_minimal() 
+```
+
+
+```{r}
+traffic_type %>% 
+  filter(`Date Range` == string_2020) %>% 
+  filter(`Week Index` != 0) %>% 
+  filter(Segment != "All Users") %>% 
+  filter(Segment != "Organic Traffic") %>% 
+  ggplot(aes(x = `Week Index`, y = Users, color = Segment)) +
+  geom_line() + 
+  geom_vline(xintercept = 18) +
+  scale_x_continuous(
+    breaks = x_breaks, 
+    labels = x_labels
+  ) +
+  labs(
+    title = "2020 traffic sources: after schema implementation, search contributes more visitors", 
+    subtitle = "Proportional decrease in direct traffic may indicate other technical causes of shift"
+  ) +
+ theme_minimal()
+```
 
 ## Duration
 
@@ -130,8 +177,12 @@ new_engagement_duration_timeseries %>%
   ggplot(aes(x = week_index, y = Sessions, color = `Session Duration`)) + 
   geom_line() + 
   geom_vline(xintercept = 18) + 
+  scale_x_continuous(
+    breaks = x_breaks, 
+    labels = x_labels
+  ) +
   labs(
-   title = "Session duration fairly stable over time", 
+   title = "Florida LSNF: Session duration fairly stable over time", 
    subtitle = "1 to 10 minute sessions slightly on the rise",
    x = "Week Index"
   ) +
@@ -148,15 +199,43 @@ new_engagement_duration_timeseries %>%
   ggplot(aes(x = week_index, y = pageview_per_session, color = `Session Duration`)) + 
   geom_line() + 
   geom_vline(xintercept = 18) + 
+  scale_x_continuous(
+    breaks = x_breaks, 
+    labels = x_labels
+  ) +
   labs(
-   title = "Pageview per session also stable over time", 
+   title = "Florida LSNF: Pageview per session also stable over time", 
    x = "Week Index", 
    y = "Pageview per session"
   ) +
   theme_minimal()
 ```
 
+
 # Search Performance
+
+```{r}
+# Search Console vs Google Analytics 
+# dates %>% 
+#   left_join(daily_visitors, by = c("Date" = "Day Index")) %>% 
+#   mutate(
+#     difference = Users - Clicks,
+#     week = week(Date)
+#   ) %>% 
+#   drop_na() %>% 
+#   group_by(week) %>% 
+#   summarize(value = sum(difference)) %>% 
+#   ggplot(aes(x = week, y = value)) + 
+#   geom_line() +
+#     scale_x_continuous(
+#     breaks = x_breaks, 
+#     labels = x_labels
+#   ) + 
+#   labs(
+#     title = "Florida LSNF: difference between Search Console clicks and"
+#   )
+```
+
 
 ```{r}
 dates %>% 
@@ -165,7 +244,8 @@ dates %>%
  geom_vline(xintercept = schema_date, color = "red") +
  geom_smooth(method = "loess") + 
  labs(
-  title = ""
+  title = "Florida LSNF: 2020 daily clicks (from Search Console)",
+  subtitle = "Increases after schema implementation, but 2019 data shows that visitor counts \nusually increase at end of year"
  ) + 
  theme_minimal()
 ```
@@ -178,7 +258,8 @@ dates %>%
  geom_vline(xintercept = schema_date, color = "red") +
  geom_smooth(method = "loess") + 
  labs(
-  title = ""
+  title = "Florida LSNF: 2020 click-through rate", 
+  subtitle = "CTR improved in October \nincrease in March/April due to lower impressions"
  ) + 
  theme_minimal()
 ```
@@ -192,7 +273,86 @@ dates %>%
  geom_smooth(method = "loess") + 
  scale_y_reverse() +
  labs(
-  title = ""
+  title = "Florida LSNF: 2020 average search result ranking",
+  subtitle = "Improvement in ranking after June: the result of schema or seasonal increase in visitors?"
  ) + 
  theme_minimal()
+```
+
+
+## Search Check:
+```{r}
+total_direct_search_clicks <- 
+ queries %>% 
+ filter(str_detect(`Date Range`, "2020")) %>% 
+ filter(`Search Query` != "legal services" || `Search Query` != "legal aid" || `Search Query` != "legal aid tallahassee") %>% 
+ drop_na() %>% 
+ summarize(
+  total_direct_search_clicks = sum(Clicks)
+ )
+total_direct_search_clicks
+```
+
+```{r}
+total_clicks <- 6274
+total_clicks
+```
+
+```{r}
+total_direct_search_clicks / total_clicks
+```
+
+## Recommendations
+
+Pages with high Click rate, but low CTR: 
+
+```{r}
+landing_pages %>% 
+ filter(str_detect(`Date Range`, "2020")) %>% 
+ filter(`Landing Page` != "Total") %>% 
+ top_n(5, wt = Clicks) %>% 
+ arrange(`CTR`) %>% 
+ select(`Landing Page`, CTR, Clicks)
+```
+
+Highest CTR: 
+
+```{r}
+landing_pages %>% 
+ filter(str_detect(`Date Range`, "2020")) %>% 
+ filter(`Landing Page` != "Total") %>% 
+ top_n(5, wt = CTR) %>% 
+ arrange(desc(`CTR`)) %>% 
+ select(`Landing Page`, CTR)
+```
+
+Highest Impression count: 
+
+```{r}
+landing_pages %>% 
+ filter(str_detect(`Date Range`, "2020")) %>% 
+ filter(`Landing Page` != "Total") %>% 
+ top_n(5, wt = Impressions) %>% 
+ arrange(desc(`Impressions`)) %>% 
+ select(`Landing Page`, Impressions)
+```
+
+Highest Page-per-session count: 
+
+```{r}
+landing_pages %>% 
+ filter(str_detect(`Date Range`, "2020")) %>% 
+ filter(`Landing Page` != "Total") %>% 
+ top_n(5, wt = `Pages / Session`) %>% 
+ arrange(desc(`Pages / Session`)) %>% 
+ select(`Landing Page`, `Pages / Session`)
+```
+
+```{r}
+landing_pages %>% 
+ filter(str_detect(`Date Range`, "2020")) %>% 
+ filter(`Landing Page` != "Total") %>% 
+ top_n(5, wt = `Clicks`) %>% 
+ arrange(desc(`Clicks`)) %>% 
+ select(`Landing Page`, `Clicks`)
 ```

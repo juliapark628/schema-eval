@@ -40,19 +40,5 @@ rsconnect/
 data/
 data-raw/
 
-# Data files
-*.csv
-*.dta
-*.gz
-*.por
-*.rda
-*.rds
-*.sas
-*.sav
-*.stata
-*.tsv
-*.txt
-*.xpt
-
 # html files
 *.html

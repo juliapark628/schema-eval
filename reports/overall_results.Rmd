@@ -1,0 +1,157 @@
+---
+title: "Florida LSNF Website Analysis"
+author: "Julia Park"
+date: "`r Sys.Date()`"
+output:
+  github_document:
+    toc: true
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Libraries
+library(tidyverse)
+library(readxl)
+library(lubridate)
+
+# Parameters
+# change this to your directory
+setwd("~/GitHub/Lab_Legal_Design/schema_eval/data")
+
+file_Florida_LSNF_search = "Florida_LSNF/search-performance.xlsx" 
+file_Florida_Law_Help_search = "Florida_Law_Help/search-performance.xlsx" 
+file_Idaho_search = "Idaho/search_result_performance.rds" 
+file_New_York_search = "New_York/search_result_performance.rds" 
+
+file_Florida_LSNF_duration = "Florida_LSNF/visitors-duration-timeseries.rds" 
+file_Idaho_duration = "Idaho/visitors-duration-timeseries.rds" 
+file_New_York_duration = "New_York/visitors-duration-timeseries.rds" 
+file_Hawaii_duration = "Hawaii/visitors-duration-timeseries.rds" 
+
+
+
+#===============================================================================
+
+# Code
+dates_Florida_LSNF <- read_excel(file_Florida_LSNF_search, sheet = "Dates")
+dates_Florida_Law_Help <- read_excel(file_Florida_Law_Help_search, sheet = "Dates")
+dates_Idaho <- read_rds(file_Idaho_search)
+dates_New_York <- read_rds(file_New_York_search)
+
+duration_Florida_LSNF <- read_rds(file_Florida_LSNF_duration)
+duration_Idaho <- read_rds(file_Idaho_duration)
+duration_New_York <- read_rds(file_New_York_duration)
+duration_Hawaii <- read_rds(file_Hawaii_duration)
+```
+
+```{r}
+dates_Florida_LSNF %>% write_csv("florida_lsnf_search.csv")
+dates_Florida_Law_Help %>% write_csv("florida_law_help_search.csv")
+dates_Idaho %>% write_csv("idaho_search.csv")
+dates_New_York %>% write_csv("_search.csv")
+```
+
+
+```{r}
+analysis <- function(df) {
+  df %>% 
+  mutate(
+    category = case_when(
+      between(Date, as.POSIXct(as.Date("2020-01-01")), as.POSIXct(as.Date("2020-04-30"))) ~ "Before", 
+      between(Date, as.POSIXct(as.Date("2020-07-01")), as.POSIXct(as.Date("2020-09-30"))) ~ "After",
+      TRUE ~ "Between"
+    )
+  ) %>% 
+  group_by(category) %>% 
+  summarize(
+    avg_CTR = mean(CTR), 
+    avg_position = mean(Position)
+  )
+}
+
+
+analysisv2 <- function(df) {
+  df %>% 
+  mutate(
+    category = case_when(
+      between(Date, as.POSIXct(as.Date("2020-01-01")), as.POSIXct(as.Date("2020-04-30"))) ~ "Before", 
+      between(Date, as.POSIXct(as.Date("2020-07-01")), as.POSIXct(as.Date("2020-09-30"))) ~ "After",
+      TRUE ~ "Between"
+    )
+  ) %>% 
+  group_by(category) %>% 
+  summarize(
+    avg_CTR = mean(CTR), 
+    avg_position = mean(`Average Position`)
+  )
+}
+
+
+analysis(dates_Florida_Law_Help)
+analysis(dates_Florida_LSNF)
+analysisv2(dates_Idaho)
+analysisv2(dates_New_York)
+
+```
+
+
+
+```{r}
+analysis <- function(df) {
+  df %>% 
+    filter(`Session Duration` != "0-10 seconds") %>% 
+    filter(`Session Duration` != "Total") %>% 
+    group_by(week_index) %>% 
+    summarize(
+      Sessions = sum(Sessions)
+    ) %>% 
+    mutate(
+      category = case_when(
+        between(week_index, 0, 21) ~ "Before", 
+        week_index > 26 ~ "After",
+        TRUE ~ "Between"
+      )
+    ) %>% 
+    group_by(category) %>% 
+    summarize(
+      avg_sessions = mean(Sessions), 
+    )
+}
+
+analysisv2 <- function(df) {
+  df %>% 
+    filter(`Session Duration Bucket` != "0-10 seconds") %>% 
+    filter(`Session Duration Bucket` != "Total") %>% 
+    group_by(week_index) %>% 
+    summarize(
+      Sessions = sum(Sessions)
+    ) %>% 
+    mutate(
+      category = case_when(
+        between(week_index, 0, 17) ~ "Before", 
+        week_index > 26 ~ "After",
+        TRUE ~ "Between"
+      )
+    ) %>% 
+    group_by(category) %>% 
+    summarize(
+      avg_sessions = mean(Sessions), 
+    ) 
+}
+
+analysis(duration_Hawaii)
+analysis(duration_Florida_LSNF)
+analysis(duration_Idaho)
+analysisv2(duration_New_York)
+
+```
+
+
+
+
